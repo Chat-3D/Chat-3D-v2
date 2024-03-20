@@ -18,8 +18,8 @@ class ValPTDataset(PTBaseDataset):
         self.feat_file, self.attribute_file, self.prompt_file = ann_file[:3]
         with open(system_path, "r") as f:
             self.system = "\n".join([x.strip() for x in f.readlines()])
-        self.feats = torch.load(self.feat_file)
-        self.attributes = torch.load(self.attribute_file)
+        self.feats = torch.load(self.feat_file, map_location='cpu')
+        self.attributes = torch.load(self.attribute_file, map_location='cpu')
         self.anno = json.load(open(self.prompt_file, 'r'))
         if stage == 2:
             self.prompt_template = "\n### Human: {}\n### Assistant:"

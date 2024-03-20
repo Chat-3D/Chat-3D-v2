@@ -66,11 +66,11 @@ def construct_bbox_corners(center, box_size):
     return corners_3d
 
 
-output_file = "outputs/2023-11-17-133632_dp0.1_lr2e-4_sta2_ep3_objscale200_scenescale50_bs1_cosine_objalign_scenealign/preds_epoch1_step39364.json"
+output_file = "/mnt/petrelfs/huanghaifeng/share/Chat-3D-v2/outputs/20240307_190254_dp0.1_lr5e-4_sta2_ep3_bs3*4_grounding_onlyscanrefer/preds_epoch2_step15072.json"
 outputs = json.load(open(output_file, "r"))
 
 
-instance_attribute_file = "annotations/scannet_pointgroup_val_attributes.pt"
+instance_attribute_file = "annotations/scannet_mask3d_val_attributes.pt"
 scannet_attribute_file = "annotations/scannet_val_attributes.pt"
 
 instance_attrs = torch.load(instance_attribute_file)
@@ -78,6 +78,10 @@ scannet_attrs = torch.load(scannet_attribute_file)
 
 iou25_acc = 0
 iou50_acc = 0
+
+count_list = [0] * 150
+iou25_acc_list = [0] * 150
+iou50_acc_list = [0] * 150
 
 for i, output in tqdm(enumerate(outputs)):
     scene_id = output["scene_id"]
@@ -119,8 +123,11 @@ for i, output in tqdm(enumerate(outputs)):
     iou = box3d_iou(pred_corners, gt_corners)
     if iou >= 0.25:
         iou25_acc += 1
+        iou25_acc_list[scannet_locs.shape[0]] += 1
     if iou >= 0.5:
         iou50_acc += 1
+        iou50_acc_list[scannet_locs.shape[0]] += 1
+    count_list[scannet_locs.shape[0]] += 1
     # max_iou = 0.
     # for pred_id in range(instance_num):
     #     pred_locs = instance_locs[pred_id].tolist()
@@ -138,3 +145,24 @@ for i, output in tqdm(enumerate(outputs)):
 
 print(f"Acc 0.25 {float(iou25_acc) / len(outputs)}")
 print(f"Acc 0.50 {float(iou50_acc) / len(outputs)}")
+
+
+split_nums = [0, 25, 35, 50, 70, 150]
+
+for i in range(len(split_nums)-1):
+    tot, iou25, iou50 = 0, 0, 0
+    for j in range(split_nums[i], split_nums[i+1]):
+        tot += count_list[j]
+        iou25 += iou25_acc_list[j]
+        iou50 += iou50_acc_list[j]
+    print(f"{split_nums[i]} <= x < {split_nums[i+1]}: {tot} {iou25 / tot} {iou50 / tot}")
+
+# for i in range(len(iou25_acc_list)):
+#     iou25_acc_list[i] = iou25_acc_list[i] / count_list[i] if count_list[i] > 0 else 0
+# for i in range(len(iou50_acc_list)):
+#     iou50_acc_list[i] = iou50_acc_list[i] / count_list[i] if count_list[i] > 0 else 0
+
+
+
+# print(iou25_acc_list)
+# print(iou50_acc_list)

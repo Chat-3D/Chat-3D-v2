@@ -27,6 +27,7 @@ from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.rouge.rouge import Rouge
 from pycocoevalcap.cider.cider import Cider
 
+
 import numpy as np
 from tqdm import tqdm
 
@@ -44,7 +45,7 @@ scorers = [
     # (Spice(), "SPICE")
 ]
 
-max_global_step = 1200000
+max_global_step = 200000000
 
 
 def train(
@@ -69,6 +70,12 @@ def train(
     stage = model_without_ddp.stage
     media_types = get_media_types(train_loaders)
 
+    # tot_param = sum(p.numel() for p in model_without_ddp.parameters())
+    # trainable_param = sum(p.numel() for p in model_without_ddp.parameters() if p.requires_grad)
+    # print(f"Total Params: {tot_param / 1e6}M")
+    # print(f"Trainable Params: {trainable_param / 1e6}M")
+    # exit()
+
     for name in loss_names:
         metric_logger.add_meter(
             f"stage{stage}-{name}", SmoothedValue(window=100, fmt="{value:.4f}")
@@ -82,8 +89,9 @@ def train(
             d.sampler.set_epoch(epoch)
     train_loader = MetaLoader(name2loader=dict(list(zip(media_types, train_loaders))))
 
-    accum_iter = 1 if stage != 1 else 1
-    eval_freq = 8000  # len(train_loader)
+    accum_iter = 4 if stage != 1 else 1
+    eval_freq = 10000  # len(train_loader)
+    max_seq_len = 0
 
     optimizer.zero_grad()
     iterator = metric_logger.log_every(train_loader, log_freq, header)
@@ -95,7 +103,9 @@ def train(
         with torch.cuda.amp.autocast(enabled=stage == 1):
             loss_dict = model(**batch)
             loss = loss_dict["loss"] / accum_iter
-
+        
+        # max_seq_len = max(max_seq_len, loss_dict["max_seq_len"])
+        # print(max_seq_len)
         scaler.scale(loss).backward()
 
         if ((i + 1) % accum_iter == 0) or (i + 1 == len(train_loader)):
@@ -212,7 +222,7 @@ def evaluate(
                 # if early_stop:
                 #     break
 
-    if len(save_preds) > 20:
+    if len(save_preds) > 2:
         save_preds = sorted(save_preds, key=lambda x: f"{x['scene_id']}_{x['obj_id']:03}_{x['qid']}")
         with open(os.path.join(config.output_dir, f"preds_epoch{epoch}_step{global_step}_rank{get_rank()}.json"),
                   "w") as f:

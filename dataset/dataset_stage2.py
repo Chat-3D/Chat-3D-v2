@@ -18,8 +18,8 @@ class S2PTDataset(PTBaseDataset):
         super().__init__()
         self.feat_file, self.attribute_file, self.anno_file = ann_file[:3]
 
-        self.feats = torch.load(self.feat_file)
-        self.attributes = torch.load(self.attribute_file)
+        self.feats = torch.load(self.feat_file, map_location='cpu')
+        self.attributes = torch.load(self.attribute_file, map_location='cpu')
         self.anno = json.load(open(self.anno_file, 'r'))
 
     def __len__(self):

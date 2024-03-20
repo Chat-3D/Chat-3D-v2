@@ -404,8 +404,10 @@ class Chat3D(nn.Module):
             attn_list.append(attn)
             target_list.append(target)
             max_seq_len = max(max_seq_len, target.shape[0])
+            
 
         dim = norm_object_embed.shape[2]
+        max_seq_len = min(256, max_seq_len)
 
         input_embeds = torch.zeros([batch_size, max_seq_len, dim], dtype=input_embed_list[0].dtype).to(device)
         attention_mask = torch.zeros([batch_size, max_seq_len], dtype=attn_list[0].dtype).to(device)
@@ -414,9 +416,14 @@ class Chat3D(nn.Module):
             input_embed = input_embed_list[i]
             attn = attn_list[i]
             target = target_list[i]
-            input_embeds[i, :input_embed.shape[0], :] = input_embed
-            attention_mask[i, :attn.shape[0]] = attn
-            targets[i, :target.shape[0]] = target
+            input_embeds[i, :min(input_embed.shape[0], max_seq_len), :] = input_embed[:min(input_embed.shape[0], max_seq_len)]
+            attention_mask[i, :min(attn.shape[0], max_seq_len)] = attn[:min(input_embed.shape[0], max_seq_len)]
+            targets[i, :min(target.shape[0], max_seq_len)] = target[:min(input_embed.shape[0], max_seq_len)]
+        
+        # if max_seq_len > 256:
+        #     input_embeds = input_embeds[:, :256]
+        #     attention_mask = attention_mask[:, :256]
+        #     targets = targets[:, :256]
 
         with self.maybe_autocast():
             outputs = self.llama_model(
@@ -429,7 +436,8 @@ class Chat3D(nn.Module):
         return dict(
             loss=outputs.loss,
             obj_norm=proj_object_embed.norm(dim=-1).mean().detach().cpu(),
-            scene_norm=proj_scene_embed.norm(dim=-1).mean().detach().cpu() if proj_scene_embed is not None else 0.
+            scene_norm=proj_scene_embed.norm(dim=-1).mean().detach().cpu() if proj_scene_embed is not None else 0.,
+            max_seq_len=max_seq_len
         )
 
     def forward_stage3(self, scene_feat, scene_attr, scene_mask, target_id, conversations, is_eval=False, **kwargs):

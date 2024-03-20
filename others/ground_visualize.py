@@ -7,12 +7,59 @@ import torch
 sys.path.append(os.path.join(os.getcwd()))
 
 # data
-SCANNET_ROOT = "/data/huanghaifeng/scannet/scans"
+SCANNET_ROOT = "/mnt/petrelfs/huanghaifeng/share/data/ScanNet_V2/scans"
 SCANNET_MESH = os.path.join(SCANNET_ROOT, "{}/{}_vh_clean_2.ply")  # scene_id, scene_id
 SCANNET_META = os.path.join(SCANNET_ROOT, "{}/{}.txt")  # scene_id, scene_id
 
 # constants
 # MEAN_COLOR_RGB = np.array([109.8, 97.2, 83.8])
+
+palette = [
+    (255, 0, 0),
+    (0, 255, 0),
+    (0, 0, 255),
+    (250, 127, 111),
+    (174, 199, 232),
+    (152, 223, 138),
+    (31, 119, 180),
+    (255, 187, 120),
+    (188, 189, 34),
+    (140, 86, 75),
+    (255, 152, 150),
+    (214, 39, 40),
+    (197, 176, 213),
+    (148, 103, 189),
+    (196, 156, 148),
+    (23, 190, 207),
+    (178, 76, 76),
+    (247, 182, 210),
+    (66, 188, 102),
+    (219, 219, 141),
+    (140, 57, 197),
+    (202, 185, 52),
+    (51, 176, 203),
+    (200, 54, 131),
+    (92, 193, 61),
+    (78, 71, 183),
+    (172, 114, 82),
+    (255, 127, 14),
+    (91, 163, 138),
+    (153, 98, 156),
+    (140, 153, 101),
+    (158, 218, 229),
+    (100, 125, 154),
+    (178, 127, 135),
+    (120, 185, 128),
+    (146, 111, 194),
+    (44, 160, 44),
+    (112, 128, 144),
+    (96, 207, 209),
+    (227, 119, 194),
+    (213, 92, 176),
+    (94, 106, 211),
+    (82, 84, 163),
+    (100, 85, 144)
+]
 
 
 def write_ply(verts, colors, indices, output_file):
@@ -36,13 +83,13 @@ def write_ply(verts, colors, indices, output_file):
     file.write('end_header\n')
     for vert, color in zip(verts, colors):
         file.write("{:f} {:f} {:f} {:d} {:d} {:d}\n".format(vert[0], vert[1], vert[2], int(color[0] * 255),
-                                                            int(color[1] * 255), int(color[2] * 255)))
+                                                        int(color[1] * 255), int(color[2] * 255)))
     for ind in indices:
         file.write('3 {:d} {:d} {:d}\n'.format(ind[0], ind[1], ind[2]))
     file.close()
 
 
-def write_bbox(bbox, mode, output_file):
+def write_bbox(bbox, output_file, color_idx=0):
     """
     bbox: (cx, cy, cz, lx, ly, lz, r), center and length in three axis, the last is the rotation
     output_file: string
@@ -173,11 +220,10 @@ def write_bbox(bbox, mode, output_file):
 
     box_min = np.min(corners, axis=0)
     box_max = np.max(corners, axis=0)
-    palette = {
-        0: [250, 127, 111],  # gt
-        1: [0, 0, 255]  # pred
-    }
-    chosen_color = palette[mode]
+
+    chosen_color = palette[color_idx % len(palette)]
+    if color_idx >= len(palette):
+        chosen_color = [(c + 37 * color_idx) % 256 for c in chosen_color]
     edges = get_bbox_edges(box_min, box_max)
     for k in range(len(edges)):
         cyl_verts, cyl_ind = create_cylinder_mesh(radius, edges[k][0], edges[k][1])
@@ -262,19 +308,33 @@ def align_mesh(scene_id):
 
 
 if __name__ == "__main__":
-    attrs = torch.load("scannet_train_attributes.pt")
-    scene_id = "scene0000_00"
-    scene_bbox = np.array(attrs[scene_id]["locs"])
+    # attrs = torch.load("annotations/scannet_mask3d_train_attributes.pt")
+    pred_attrs = torch.load("annotations/scannet_mask3d_val_attributes.pt")
+    gt_attrs = torch.load("annotations/scannet_val_attributes.pt")
+    scene_id = "scene0249_00"
+    pred_id = 17
+    gt_id = 8
+
+    pred_scene_bbox = np.array(pred_attrs[scene_id]["locs"])
+    gt_scene_bbox = np.array(gt_attrs[scene_id]["locs"])
 
     output_scene_dir = f"vis/{scene_id}"
 
     os.makedirs(output_scene_dir, exist_ok=True)
+    
+    if not os.path.exists(os.path.join(output_scene_dir, 'mesh.ply')):
+        mesh = align_mesh(scene_id)
+        mesh.write(os.path.join(output_scene_dir, 'mesh.ply'))
 
-    mesh = align_mesh(scene_id)
-    mesh.write(os.path.join(output_scene_dir, 'mesh.ply'))
+    pred_bbox = pred_scene_bbox[pred_id] + [0.]
+    gt_bbox = gt_scene_bbox[gt_id] + [0.]
+    write_bbox(pred_bbox, os.path.join(output_scene_dir, f"pred_{pred_id}.ply"), 2)
+    write_bbox(gt_bbox, os.path.join(output_scene_dir, f"gt_{gt_id}.ply"), 1)
 
-    for obj_id in range(len(scene_bbox)):
-        obj_bbox = scene_bbox[obj_id] + [0.]
-        write_bbox(obj_bbox, 0, os.path.join(output_scene_dir, f"{obj_id}.ply"))
+
+    # for obj_id in range(len(pred_scene_bbox)):
+    #     obj_bbox = pred_scene_bbox[obj_id] + [0.]
+    #     write_bbox(obj_bbox, os.path.join(output_scene_dir, f"{obj_id}.ply"), obj_id)
+
 
 

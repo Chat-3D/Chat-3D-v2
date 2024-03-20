@@ -1,14 +1,15 @@
 # ========================= data ==========================
 anno_root = "annotations"  # annotation dir
 pc_encoder = "uni3d"
+segmentor = "mask3d"
 feat_file = f"{anno_root}/scannet_{pc_encoder}_feats.pt"
 # attribute_file = f"{anno_root}/scannet_attributes.json"
 train_file_s1 = [
-    [
-        feat_file,
-        f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/scanrefer_train_stage1.json",
-    ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_train_stage1.json",
+    # ],
     # [
     #     feat_file,
     #     attribute_file,
@@ -29,37 +30,47 @@ train_file_s2 = [
     [
         feat_file,
         f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/scanrefer_train_stage2_objxx.json",
+        f"{anno_root}/scanrefer_train_stage2_caption.json",
     ],
-    # [
-    #     f"{anno_root}/scannet_pointgroup_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_pointgroup_train_attributes.pt",
-    #     f"{anno_root}/scanrefer_pointgroup_train_stage2_caption_iou50.json"
-    # ],
     [
         feat_file,
         f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/nr3d_train_stage2_objxx.json"
+        f"{anno_root}/scannet_train_stage2_caption.json",
     ],
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_train_attributes.pt",
-    #     f"{anno_root}/sr3d_train_stage2_objxx.json"
-    # ],
     [
         feat_file,
         f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/scene_align_train.json",
+        f"{anno_root}/nr3d_train_stage2_caption.json"
     ],
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_train_attributes.pt",
-    #     f"{anno_root}/obj_align_train.json",
-    # ],
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_train_attributes.pt",
     #     f"{anno_root}/scanqa_train_stage2_objxx.json"
+    # ],
+    # [
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_train_stage2_caption_iou50.json"
+    # ],
+    # [
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_train_stage2_caption_iou25.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/sr3d_train_stage2_objxx.json"
+    # # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/scene_align_train.json",
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/obj_align_train.json",
     # ],
     # [
     #     feat_file,
@@ -82,9 +93,9 @@ train_file_s2 = [
     #     f"{anno_root}/sr3d_train_stage2_grounding_new.json"
     # ],
     # [
-    #     f"{anno_root}/scannet_pointgroup_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_pointgroup_train_attributes.pt",
-    #     f"{anno_root}/scanrefer_pointgroup_train_stage2_grounding_new.json"
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_train_stage2_grounding_new.json"
     # ],
     # [
     #     feat_file,
@@ -98,21 +109,31 @@ train_file_s2 = [
     # ]
 ]
 val_file_s2 = [
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_val_attributes.pt",
-    #     f"{anno_root}/scanrefer_val_stage2_objxx.json"
-    # ],
-    # [
-    #     f"{anno_root}/scannet_pointgroup_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_pointgroup_val_attributes.pt",
-    #     f"{anno_root}/scanrefer_pointgroup_val_stage2_caption_iou25.json"
-    # ],
     [
         feat_file,
         f"{anno_root}/scannet_val_attributes.pt",
-        f"{anno_root}/stage2_val400.json"
+        f"{anno_root}/scanrefer_val_stage2_caption100.json"
     ],
+    [
+        feat_file,
+        f"{anno_root}/scannet_val_attributes.pt",
+        f"{anno_root}/nr3d_val_stage2_caption100.json"
+    ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/scanqa_val_stage2_objxx100.json"
+    # ],
+    # [
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_val_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_val_stage2_caption_iou25.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/stage2_val400.json"
+    # ],
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_val_attributes.pt",
@@ -144,9 +165,9 @@ val_file_s2 = [
     #     f"{anno_root}/sr3d_val_stage2_grounding_new.json"
     # ],
     # [
-    #     f"{anno_root}/scannet_pointgroup_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_pointgroup_val_attributes.pt",
-    #     f"{anno_root}/scanrefer_pointgroup_val_stage2_grounding_new.json"
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_val_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_val_stage2_grounding_new.json"
     # ],
     # [
     #     feat_file,
@@ -157,7 +178,7 @@ val_file_s2 = [
     #     feat_file,
     #     f"{anno_root}/scannet_val_attributes.pt",
     #     f"{anno_root}/scene_dataset_val_stage2.json"
-    # ],
+    # ]
 ]
 train_file_s3 = [
     [
@@ -216,7 +237,7 @@ num_workers = 32
 
 # ========================= input ==========================
 s1_batch_size = 64
-s2_batch_size = 1
+s2_batch_size = 24
 s3_batch_size = 1
 # max_txt_l = 32
 

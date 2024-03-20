@@ -67,17 +67,18 @@ def construct_bbox_corners(center, box_size):
 
 
 # outputs = json.load(open("outputs/2023-11-15-231032_dp0.1_lr2e-4_sta2_ep3_objscale200_scenescale50_bs1_cosine_objalign_scenealign_mean/preds_epoch-1_step0.json", "r"))
+
 # split = "val"
 # annos = json.load(open(f"annotations/scanrefer_{split}_stage2_grounding_new.json", "r"))
 # new_annos = []
-#
+
 # instance_attribute_file = f"annotations/scannet_pointgroup_{split}_attributes.pt"
 # scannet_attribute_file = f"annotations/scannet_{split}_attributes.pt"
-#
+
 # instance_attrs = torch.load(instance_attribute_file)
 # scannet_attrs = torch.load(scannet_attribute_file)
-#
-#
+
+
 # for i, anno in tqdm(enumerate(annos)):
 #     scene_id = anno["scene_id"]
 #     obj_id = anno["obj_id"]
@@ -109,31 +110,34 @@ def construct_bbox_corners(center, box_size):
 #             "ref_captions": [f"Obj{max_id:02}."],
 #             "prompt": anno["prompt"]
 #         })
-#
+
 # print(len(new_annos))
-#
+
 # with open(f"annotations/scanrefer_pointgroup_{split}_stage2_grounding_new.json", "w") as f:
 #     json.dump(new_annos, f, indent=4)
 
 
 split = "val"
+encoder = "mask3d"
+thr = 0.25
 annos = json.load(open(f"annotations/scanrefer_{split}_stage2_objxx.json", "r"))
 new_annos = []
 
-instance_attribute_file = f"annotations/scannet_pointgroup_{split}_attributes.pt"
+instance_attribute_file = f"annotations/scannet_{encoder}_{split}_attributes.pt"
 scannet_attribute_file = f"annotations/scannet_{split}_attributes.pt"
 
 instance_attrs = torch.load(instance_attribute_file)
 scannet_attrs = torch.load(scannet_attribute_file)
 
 filtered_annos = {}
-thr = 0.25
 
 for i, anno in tqdm(enumerate(annos)):
     scene_id = anno["scene_id"]
     obj_id = anno["obj_id"]
     prompt = anno["prompt"]
     qid = f"{scene_id}_{obj_id}"
+    if scene_id not in instance_attrs:
+        continue
     instance_locs = instance_attrs[scene_id]["locs"]
     scannet_locs = scannet_attrs[scene_id]["locs"]
     instance_num = instance_locs.shape[0]
@@ -170,5 +174,5 @@ if len(new_annos) == 0:
     new_annos = list(filtered_annos.values())
 print(len(new_annos))
 
-with open(f"annotations/scanrefer_pointgroup_{split}_stage2_caption_iou{int(thr*100)}.json", "w") as f:
+with open(f"annotations/scanrefer_{encoder}_{split}_stage2_caption_iou{int(thr*100)}.json", "w") as f:
     json.dump(new_annos, f, indent=4)

@@ -27,8 +27,8 @@ class S3PTDataset(PTBaseDataset):
         self.begin_signal = "###"
         self.end_signal = " "
 
-        self.feats = torch.load(self.feat_file)
-        self.attributes = torch.load(self.attribute_file)
+        self.feats = torch.load(self.feat_file, map_location='cpu')
+        self.attributes = torch.load(self.attribute_file, map_location='cpu')
         self.convs = json.load(open(self.conv_file, 'r'))
         if isinstance(self.convs, list):
             self.anno = self.convs * repeat
