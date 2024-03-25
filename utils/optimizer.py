@@ -42,8 +42,20 @@ def add_different_lr(named_param_tuples_or_model, diff_lr_names, diff_lrs, diff_
         named_param_tuples_with_lr: List([name, param, weight_decay, lr])
     """
     named_param_tuples_with_lr = []
+
+    if diff_lrs is None:
+        for name, p, wd in named_param_tuples_or_model:
+            named_param_tuples_with_lr.append(
+                [name, p, wd, default_lr]
+            )
+        if is_main_process():
+            for name, _, wd, diff_lr in named_param_tuples_with_lr:
+                logger.info(f"param {name}: wd: {wd}, lr: {diff_lr}")
+        return named_param_tuples_with_lr
+
     if not isinstance(diff_lrs, list):
         diff_lrs = [diff_lrs] * len(diff_lr_names)
+        diff_wds = [diff_wds] * len(diff_lr_names)
     logger.info(f"diff_names: {diff_lr_names}, diff_lrs: {diff_lrs}")
     for name, p, wd in named_param_tuples_or_model:
         use_diff_lr = False
@@ -90,17 +102,21 @@ def create_optimizer_params_group(named_param_tuples_with_lr):
     return optimizer_params_group
 
 
-def create_optimizer(args, model, filter_bias_and_bn=True):
+def create_optimizer(args, model, global_config, filter_bias_and_bn=True):
     opt_lower = args.opt.lower()
     weight_decay = args.weight_decay
     # check for modules that requires different lr
+    lr_multi = global_config.batch_size * global_config.gpu_num
+    args.lr = args.lr * lr_multi
     if hasattr(args, "different_lr") and args.different_lr.enable:
         diff_lr_module_names = args.different_lr.module_names
         diff_lr = args.different_lr.lr
+        diff_lr = list(map(lambda x: x * lr_multi, diff_lr))
         diff_wd = args.different_lr.wd
     else:
         diff_lr_module_names = []
         diff_lr = None
+        diff_wd = None
 
     no_decay = {}
     if hasattr(model, 'no_weight_decay'):

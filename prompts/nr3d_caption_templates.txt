@@ -1,10 +1,10 @@
-Detail the spatial positioning of the obj<id> amidst surrounding elements.
-Illustrate the obj<id>'s placement relative to its environment.
-Explain the obj<id>'s location in correlation with nearby items.
-Elaborate on the obj<id>'s spatial context within the scene.
-Describe how the obj<id> is situated in relation to other elements present.
-Provide insight into the obj<id>'s positioning among its surroundings.
-Discuss the relative placement of the obj<id> compared to its surrounding context.
-Offer a depiction of the obj<id>'s spatial orientation within the scene.
-Interpret the obj<id>'s location within the broader context of the scene.
-Present the obj<id>'s spatial relationship with other entities within the scene.
+Detail the spatial positioning of the <id> amidst surrounding elements.
+Illustrate the <id>'s placement relative to its environment.
+Explain the <id>'s location in correlation with nearby items.
+Elaborate on the <id>'s spatial context within the scene.
+Describe how the <id> is situated in relation to other elements present.
+Provide insight into the <id>'s positioning among its surroundings.
+Discuss the relative placement of the <id> compared to its surrounding context.
+Offer a depiction of the <id>'s spatial orientation within the scene.
+Interpret the <id>'s location within the broader context of the scene.
+Present the <id>'s spatial relationship with other entities within the scene.

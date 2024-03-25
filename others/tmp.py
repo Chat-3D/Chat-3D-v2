@@ -1,15 +1,32 @@
 import torch
+import json
 
-# a = torch.load('annotations/scannet_train_attributes.pt')
-a = torch.load('annotations/scannet_mask3d_val_attributes.pt')
+# annos = json.load(open("annotations/obj_align_train_OBJ.json"))
 
-tot = 0
-for k, v in a.items():
-    tot += len(v['locs'])
+# new_annos = []
+# obj_ids = set()
 
-print(tot / len(a))
+# for anno in annos:
+#     if anno['scene_id'] == "scene0000_00":
+#         tmp_id = int(anno["caption"].split("OBJ")[1][:3])
+#         if tmp_id in obj_ids:
+#             continue
+#         obj_ids.add(tmp_id)
+#         if anno["caption"].startswith("<OBJ"):
+#             anno["caption"] = "The " + anno["caption"]
+        
+#         anno["ref_captions"] = [anno["caption"]]
+#         del anno["caption"]
+#         new_annos.append(anno)
 
-# import json
+# print(len(new_annos))
+# with open("annotations/obj_align_val_one_scene.json", "w") as f:
+#     json.dump(new_annos, f, indent=4)
 
-# x = json.load(open('annotations/scanrefer_mask3d_train_stage2_grounding_new.json'))
-# print(len(x))
+annos = json.load(open("/mnt/petrelfs/huanghaifeng/share/Chat-3D-v2/annotations/scanrefer_mask3d_val_stage2_grounding_OBJ.json"))
+
+import random
+annos = random.sample(annos, 200)
+
+with open("annotations/scanrefer_mask3d_val_stage2_grounding_OBJ100.json", "w") as f:
+    json.dump(annos, f, indent=4)

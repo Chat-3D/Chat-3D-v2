@@ -5,11 +5,11 @@ segmentor = "mask3d"
 feat_file = f"{anno_root}/scannet_{pc_encoder}_feats.pt"
 # attribute_file = f"{anno_root}/scannet_attributes.json"
 train_file_s1 = [
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_train_attributes.pt",
-    #     f"{anno_root}/scanrefer_train_stage1.json",
-    # ],
+    [
+        feat_file,
+        f"{anno_root}/scannet_train_attributes.pt",
+        f"{anno_root}/scanrefer_train_stage1.json",
+    ],
     # [
     #     feat_file,
     #     attribute_file,
@@ -27,26 +27,51 @@ train_file_s1 = [
     # ]
 ]
 train_file_s2 = [
-    [
-        feat_file,
-        f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/scanrefer_train_stage2_caption.json",
-    ],
-    [
-        feat_file,
-        f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/scannet_train_stage2_caption.json",
-    ],
-    [
-        feat_file,
-        f"{anno_root}/scannet_train_attributes.pt",
-        f"{anno_root}/nr3d_train_stage2_caption.json"
-    ],
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_train_attributes.pt",
-    #     f"{anno_root}/scanqa_train_stage2_objxx.json"
+    #     f"{anno_root}/obj_align_train_one_scene.json"
     # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_train_stage2_caption_OBJ.json",
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/scannet_train_stage2_caption_OBJ.json",
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/nr3d_train_stage2_caption_OBJ.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_train_stage2_grounding_OBJ.json"
+    # ],
+    # [
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_train_stage2_grounding_OBJ.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/obj_align_train_OBJ.json"
+    # ],
+    [
+        f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+        f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
+        f"{anno_root}/scanqa_train_stage2.json"
+    ],
+    [
+        feat_file,
+        f"{anno_root}/scannet_train_attributes.pt",
+        f"{anno_root}/scanqa_train_stage2_objxx.json"
+    ],
     # [
     #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
     #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
@@ -85,17 +110,7 @@ train_file_s2 = [
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_train_attributes.pt",
-    #     f"{anno_root}/scanrefer_train_stage2_grounding_new.json"
-    # ],
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_train_attributes.pt",
     #     f"{anno_root}/sr3d_train_stage2_grounding_new.json"
-    # ],
-    # [
-    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_{segmentor}_train_attributes.pt",
-    #     f"{anno_root}/scanrefer_{segmentor}_train_stage2_grounding_new.json"
     # ],
     # [
     #     feat_file,
@@ -109,16 +124,41 @@ train_file_s2 = [
     # ]
 ]
 val_file_s2 = [
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_train_attributes.pt",
+    #     f"{anno_root}/obj_align_val_one_scene.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/scanrefer_val_stage2_caption100_OBJ.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/nr3d_val_stage2_caption100_OBJ.json"
+    # ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/obj_align_val_OBJ.json"
+    # ],
+    # [
+    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+    #     f"{anno_root}/scannet_{segmentor}_val_attributes.pt",
+    #     f"{anno_root}/scanrefer_{segmentor}_val_stage2_grounding_OBJ.json"
+    # ],
     [
-        feat_file,
-        f"{anno_root}/scannet_val_attributes.pt",
-        f"{anno_root}/scanrefer_val_stage2_caption100.json"
+        f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
+        f"{anno_root}/scannet_{segmentor}_val_attributes.pt",
+        f"{anno_root}/scanqa_val_stage2.json"
     ],
-    [
-        feat_file,
-        f"{anno_root}/scannet_val_attributes.pt",
-        f"{anno_root}/nr3d_val_stage2_caption100.json"
-    ],
+    # [
+    #     feat_file,
+    #     f"{anno_root}/scannet_val_attributes.pt",
+    #     f"{anno_root}/scanqa_val_stage2.json"
+    # ],
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_val_attributes.pt",
@@ -157,17 +197,7 @@ val_file_s2 = [
     # [
     #     feat_file,
     #     f"{anno_root}/scannet_val_attributes.pt",
-    #     f"{anno_root}/scanqa_val_stage2_new.json"
-    # ],
-    # [
-    #     feat_file,
-    #     f"{anno_root}/scannet_val_attributes.pt",
     #     f"{anno_root}/sr3d_val_stage2_grounding_new.json"
-    # ],
-    # [
-    #     f"{anno_root}/scannet_{segmentor}_{pc_encoder}_feats.pt",
-    #     f"{anno_root}/scannet_{segmentor}_val_attributes.pt",
-    #     f"{anno_root}/scanrefer_{segmentor}_val_stage2_grounding_new.json"
     # ],
     # [
     #     feat_file,
@@ -237,7 +267,7 @@ num_workers = 32
 
 # ========================= input ==========================
 s1_batch_size = 64
-s2_batch_size = 24
+s2_batch_size = 32
 s3_batch_size = 1
 # max_txt_l = 32
 
@@ -246,22 +276,30 @@ pre_text = False
 
 # ========================= model ==========================
 model = dict(
-    llama_model_path="model/vicuna-7b-v0",
+    llama_model_path="model/vicuna-7b-v1.5",
     input_dim=1024 if pc_encoder == "uni3d" else 512,
     attr_dim=512,
     encoder_num_layers=1,
     mlp_dropout=0.1,
     low_resource=False,
     system_path="prompts/system.txt",
-    prompt_template="\n### Human: {}\n### Assistant: ",
+    instruction_path="prompts/instruction.txt",
     max_txt_len=512,
-    end_sym="\n###",
+    end_sym="</s>",
+    role=("USER", "ASSISTANT"),
     stage=3,
     add_scene_token=True,
-    debug=False,
     obj_norm_scale=200,
     scene_norm_scale=50,
     grad_scale=1,
+    use_lora=False
+)
+
+lora = dict(
+    lora_target_modules=["q_proj", "v_proj"],
+    lora_r=64,
+    lora_alpha=16,
+    lora_dropout=0.05
 )
 
 optimizer = dict(
@@ -272,10 +310,10 @@ optimizer = dict(
     max_grad_norm=-1,  # requires a positive float, use -1 to disable
     # use a different lr for some modules, e.g., larger lr for new modules
     different_lr=dict(
-        enable=True,
-        module_names=["module.llama_model", "module.relation_module"],
-        lr=[1e-5, 1e-5],
-        wd=[0.02, 0.02]
+        enable=False,
+        module_names=["module.relation_module"],
+        lr=[5e-7],
+        wd=[0.02]
     ),
 )
 
@@ -300,7 +338,7 @@ device = "cuda"
 output_dir = "outputs/tmp"  # output dir
 resume = False  # if True, load optimizer and scheduler states as well
 debug = False
-log_freq = 100
+log_freq = 20
 # eval_freq = 500
 seed = 42
 
@@ -308,3 +346,6 @@ save_latest = False
 do_save = True
 auto_resume = True
 pretrained_path = ""
+
+debug=False
+gpu_num=1

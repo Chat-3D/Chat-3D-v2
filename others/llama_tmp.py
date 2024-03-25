@@ -2,7 +2,7 @@ import json
 import torch
 import sys
 sys.path.append(".")
-from models.modeling_llama import LlamaForCausalLM
+from models.modeling_llama_new import LlamaForCausalLM
 from transformers import LlamaTokenizer, LlamaConfig
 from collections import defaultdict
 
@@ -17,14 +17,17 @@ model = LlamaForCausalLM.from_pretrained(
     llama_model_path,
     torch_dtype=torch.float16
 )
+# model = model.to("cuda")
+# print(torch.cuda.memory_allocated(device="cuda:0")/1e9)
+# exit()
 print("is training:", model.training)
 # for p in model.parameters():
 #     p.requires_grad = False
 print("Loading LLaMA Done")
-llama_tokenizer.add_tokens(["<obj01>", "<obj02>"], special_tokens=True)
+
+llama_tokenizer.add_tokens(["<obj01>", "<obj02>"], special_tokens=False)
+
 model.resize_token_embeddings(len(llama_tokenizer))
-token_embeds = model.get_input_embeddings().weight.data
-token_embeds[-2:] = torch.nn.Parameter(token_embeds[-2:], requires_grad=True)
 
 
 def get_text_len(text):
@@ -43,8 +46,5 @@ def get_emb(text, is_eval=False):
         model.train()
     return model.model.embed_tokens(input_ids)
 
-# print(get_emb("object").mean())
-print(model.get_input_embeddings().weight.data.requires_grad)
-print(model.get_input_embeddings().weight.requires_grad)
-print(model.get_input_embeddings().weight[-1].requires_grad)
+
 breakpoint()

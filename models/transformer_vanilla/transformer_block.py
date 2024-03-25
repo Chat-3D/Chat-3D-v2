@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import einops
 import numpy as np
+import math
 
 # from .mhsa import MultiHeadSelfAttention
 #
@@ -234,12 +235,12 @@ class TransformerSpatialDecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
-        self.dropout1 = nn.Dropout(dropout)
-        self.dropout2 = nn.Dropout(dropout)
-        self.dropout3 = nn.Dropout(dropout)
+        # self.norm1 = nn.LayerNorm(d_model)
+        # self.norm2 = nn.LayerNorm(d_model)
+        # self.norm3 = nn.LayerNorm(d_model)
+        # self.dropout1 = nn.Dropout(dropout)
+        # self.dropout2 = nn.Dropout(dropout)
+        # self.dropout3 = nn.Dropout(dropout)
 
         self.activation = nn.GELU()
 
@@ -247,12 +248,11 @@ class TransformerSpatialDecoderLayer(nn.Module):
             self, tgt, tgt_pairwise_locs,
             tgt_key_padding_mask=None,
     ):
-        tgt2 = self.norm1(tgt)
         tgt2 = self.self_attn(
-            tgt2, tgt2, tgt2, tgt_pairwise_locs,
+            tgt, tgt, tgt, tgt_pairwise_locs,
             key_padding_mask=tgt_key_padding_mask,
         )
-        tgt = tgt + self.dropout1(tgt2)
+        tgt = (tgt + tgt2) / math.sqrt(2)
         # tgt2 = self.norm2(tgt)
         # tgt2, cross_attn_matrices = self.multihead_attn(
         #     query=tgt2, key=memory,
@@ -284,12 +284,12 @@ class CMT(nn.Module):
         )
         self.layers = _get_clones(decoder_layer, num_layers)
 
-        loc_layer = nn.Sequential(
-            nn.Linear(6, hidden_size),
-            nn.ReLU(),
-            nn.LayerNorm(hidden_size)
-        )
-        self.loc_layers = _get_clones(loc_layer, 1)
+        # loc_layer = nn.Sequential(
+        #     nn.Linear(6, hidden_size),
+        #     nn.ReLU(),
+        #     nn.LayerNorm(hidden_size)
+        # )
+        # self.loc_layers = _get_clones(loc_layer, 1)
 
         self.apply(self._init_weights)
 

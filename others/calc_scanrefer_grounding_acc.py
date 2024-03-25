@@ -66,7 +66,7 @@ def construct_bbox_corners(center, box_size):
     return corners_3d
 
 
-output_file = "/mnt/petrelfs/huanghaifeng/share/Chat-3D-v2/outputs/20240307_190254_dp0.1_lr5e-4_sta2_ep3_bs3*4_grounding_onlyscanrefer/preds_epoch2_step15072.json"
+output_file = "/mnt/petrelfs/huanghaifeng/share/Chat-3D-v2/outputs/20240325_031151_dp0.1_lr1e-5_sta2_ep10_scenealign_special_trainemb/preds_epoch2_step4203.json"
 outputs = json.load(open(output_file, "r"))
 
 
@@ -91,14 +91,14 @@ for i, output in tqdm(enumerate(outputs)):
     pred = output["pred"]
     instance_num = instance_locs.shape[0]
     pred_id = random.randint(0, instance_num-1)
-    pred = pred.capitalize()
-    pred = pred.replace("object", "")
-    pred = pred.replace("Object", "")
+    # pred = pred.capitalize()
+    # pred = pred.replace("object", "")
+    # pred = pred.replace("Object", "")
     # print(pred)
     # breakpoint()
     flag = 0
-    if "Obj" in pred:
-        tmp = pred.split("Obj")[1]
+    if "OBJ" in pred:
+        tmp = pred.split("OBJ")[1]
         j = 0
         while tmp[:j+1].isdigit() and j < len(tmp):
             j = j + 1
@@ -106,15 +106,24 @@ for i, output in tqdm(enumerate(outputs)):
             flag = 1
             if int(tmp[:j]) < instance_num:
                 pred_id = int(tmp[:j])
-    if not flag and "obj" in pred:
-        tmp = pred.split("obj")[1]
-        j = 0
-        while tmp[:j+1].isdigit() and j < len(tmp):
-            j = j + 1
-        if j > 0:
-            flag = 1
-            if int(tmp[:j]) < instance_num:
-                pred_id = int(tmp[:j])
+    # if "Obj" in pred:
+    #     tmp = pred.split("Obj")[1]
+    #     j = 0
+    #     while tmp[:j+1].isdigit() and j < len(tmp):
+    #         j = j + 1
+    #     if j > 0:
+    #         flag = 1
+    #         if int(tmp[:j]) < instance_num:
+    #             pred_id = int(tmp[:j])
+    # if not flag and "obj" in pred:
+    #     tmp = pred.split("obj")[1]
+    #     j = 0
+    #     while tmp[:j+1].isdigit() and j < len(tmp):
+    #         j = j + 1
+    #     if j > 0:
+    #         flag = 1
+    #         if int(tmp[:j]) < instance_num:
+    #             pred_id = int(tmp[:j])
     # print(pred_id)
     pred_locs = instance_locs[pred_id].tolist()
     gt_locs = scannet_locs[obj_id].tolist()

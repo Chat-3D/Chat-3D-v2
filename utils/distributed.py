@@ -74,8 +74,6 @@ def init_distributed_mode(args):
         world_size = int(os.environ["SLURM_NNODES"]) * \
             int(os.environ["SLURM_TASKS_PER_NODE"][0])
 
-        print(world_size)
-
         args.rank = global_rank
         args.gpu = local_rank
         args.world_size = world_size

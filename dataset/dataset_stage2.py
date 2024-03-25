@@ -60,28 +60,29 @@ class S2PTDataset(PTBaseDataset):
         #         scene_colors = scene_colors[final_mask.bool()]
         #         if related_ids is not None:
         #             related_ids = [int(prefix_sum[x])-1 for x in related_ids]
-        detach_mask = torch.ones(scene_feat.shape[0], dtype=torch.bool)
-        if related_ids is not None:
-            for rid in related_ids:
-                detach_mask[rid] = 0
-        return scene_feat, scene_locs, scene_colors, obj_id, caption, question, detach_mask
+        # detach_mask = torch.ones(scene_feat.shape[0], dtype=torch.bool)
+        # if related_ids is not None:
+        #     for rid in related_ids:
+        #         if rid < scene_feat.shape[0]:
+        #             detach_mask[rid] = 0
+        return scene_feat, scene_locs, scene_colors, obj_id, caption, question
 
 
 def s2_collate_fn(batch):
-    scene_feats, scene_locs, scene_colors, obj_ids, captions, questions, detach_masks = zip(*batch)
+    scene_feats, scene_locs, scene_colors, obj_ids, captions, questions = zip(*batch)
     batch_scene_feat, batch_scene_locs, batch_scene_colors, batch_scene_mask = process_batch_data(scene_feats,
                                                                                                   scene_locs,
                                                                                                   scene_colors)
-    batch_detach_mask = torch.ones_like(batch_scene_mask, dtype=torch.bool)
-    for i in range(batch_detach_mask.shape[0]):
-        batch_detach_mask[i][:detach_masks[i].shape[0]] = detach_masks[i]
+    # batch_detach_mask = torch.ones_like(batch_scene_mask, dtype=torch.bool)
+    # for i in range(batch_detach_mask.shape[0]):
+    #     batch_detach_mask[i][:detach_masks[i].shape[0]] = detach_masks[i]
     obj_ids = torch.tensor(obj_ids)
     return {
         "scene_feat": batch_scene_feat,
         "scene_locs": batch_scene_locs,
         "scene_colors": batch_scene_colors,
         "scene_mask": batch_scene_mask,
-        "detach_mask": batch_detach_mask,
+        # "detach_mask": batch_detach_mask,
         "obj_ids": obj_ids,
         "answers": captions,
         "questions": questions

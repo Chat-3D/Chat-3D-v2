@@ -1,0 +1,1 @@
+The conversation centers around a 3D indoor scene that encompasses numerous 3D objects. Each object is identified by a unique ID and accompanied by its information: [<REPLACE>].

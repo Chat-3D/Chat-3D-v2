@@ -42,7 +42,7 @@ def setup_model(
     logger.info("Creating model")
     config = copy.deepcopy(config)
 
-    model = model_cls(config=config.model)
+    model = model_cls(config=config)
 
     model = model.to(torch.device(config.device))
     model_without_ddp = model
@@ -51,9 +51,9 @@ def setup_model(
             model,
             device_ids=[config.gpu],
             find_unused_parameters=find_unused_parameters,  # `False` for image-only task
+            gradient_as_bucket_view=True
         )
-
-    optimizer = create_optimizer(config.optimizer, model)
+    optimizer = create_optimizer(config.optimizer, model, config)
     scheduler = create_scheduler(config.scheduler, optimizer)
     scaler = torch.cuda.amp.GradScaler(enabled=config.fp16, growth_interval=100)
 

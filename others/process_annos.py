@@ -6,11 +6,11 @@ import jsonlines
 
 # nltk.download("punkt")
 
-dataset = "sr3d"
-split = "val"
-# anno_file = f"annotations/{dataset}_{split}_stage2_objxx.json"
-#
-# annos = json.load(open(anno_file, "r"))
+dataset = "scanrefer"
+split = "train"
+anno_file = f"annotations/{dataset}_{split}_stage2_objxx.json"
+
+annos = json.load(open(anno_file, "r"))
 
 
 # with open("prompts/concise_description_objxx.txt", 'r') as f:
@@ -64,58 +64,70 @@ split = "val"
 #         annos[i]["ref_captions"] = [
 #             f"obj{obj_id:02}.".capitalize()
 #         ]
-#
+
 # with open(f"annotations/{dataset}_{split}_stage2_grounding_new.json", "w") as f:
 #     json.dump(annos, f, indent=4)
 
 
 
 template = "According to the given description, \"<desc>,\" please provide the ID of the object that closely matches this description."
-# new_annos = []
-# import tqdm
-# for anno in tqdm.tqdm(annos):
-#     scene_id = anno["scene_id"]
-#     obj_id = anno["obj_id"]
-#     for caption in anno["ref_captions"]:
-#         caption = caption.strip()
-#         if caption[-1] == ".":
-#             caption = caption[:-1]
-#         prompt = template.replace("<desc>", caption)
-#         new_annos.append({
-#             "scene_id": scene_id,
-#             "obj_id": obj_id,
-#             "prompt": prompt,
-#             "ref_captions": [
-#                 f"obj{obj_id:02}.".capitalize()
-#             ]
-#         })
-# print(len(new_annos))
-#
-# with open(f"annotations/{dataset}_{split}_stage2_grounding_new.json", "w") as f:
-#     json.dump(new_annos, f, indent=4)
+new_annos = []
+import tqdm
+for anno in tqdm.tqdm(annos):
+    scene_id = anno["scene_id"]
+    obj_id = anno["obj_id"]
+    if split == "train":
+        caption = anno["caption"].strip()
+        if caption[-1] == ".":
+            caption = caption[:-1]
+        prompt = template.replace("<desc>", caption)
+        new_annos.append({
+            "scene_id": scene_id,
+            "obj_id": obj_id,
+            "prompt": prompt,
+            "caption": f"<OBJ{obj_id:02}>."
+        })
+    else:
+        for caption in anno["ref_captions"]:
+            caption = caption.strip()
+            if caption[-1] == ".":
+                caption = caption[:-1]
+            prompt = template.replace("<desc>", caption)
+            new_annos.append({
+                "scene_id": scene_id,
+                "obj_id": obj_id,
+                "prompt": prompt,
+                "ref_captions": [
+                    f"<OBJ{obj_id:03}>."
+                ]
+            })
+print(len(new_annos))
+
+with open(f"annotations/{dataset}_{split}_stage2_grounding_OBJ.json", "w") as f:
+    json.dump(new_annos, f, indent=4)
 
 
-anno_file = "/root/scene-LLaMA/datasets/referit3d/annotations/bert_tokenized/sr3d.jsonl"
-val_split_path = "/root/scene-LLaMA/datasets/referit3d/annotations/splits/scannetv2_val.txt"
-train_split_path = "/root/scene-LLaMA/datasets/referit3d/annotations/splits/scannetv2_train.txt"
-train_scene_ids = []
-val_scene_ids = []
+# anno_file = "/root/scene-LLaMA/datasets/referit3d/annotations/bert_tokenized/sr3d.jsonl"
+# val_split_path = "/root/scene-LLaMA/datasets/referit3d/annotations/splits/scannetv2_val.txt"
+# train_split_path = "/root/scene-LLaMA/datasets/referit3d/annotations/splits/scannetv2_train.txt"
+# train_scene_ids = []
+# val_scene_ids = []
 
-with open(train_split_path, "r") as f:
-    for line in f.readlines():
-        train_scene_ids.append(line.strip())
+# with open(train_split_path, "r") as f:
+#     for line in f.readlines():
+#         train_scene_ids.append(line.strip())
 
-with open(val_split_path, "r") as f:
-    for line in f.readlines():
-        val_scene_ids.append(line.strip())
+# with open(val_split_path, "r") as f:
+#     for line in f.readlines():
+#         val_scene_ids.append(line.strip())
 
-annos = []
-with jsonlines.open(anno_file, "r") as reader:
-    for l in reader:
-        annos.append(l)
+# annos = []
+# with jsonlines.open(anno_file, "r") as reader:
+#     for l in reader:
+#         annos.append(l)
 
-train_annos = []
-val_annos = []
+# train_annos = []
+# val_annos = []
 
 # for anno in annos:
 #     scene_id = anno["scan_id"]
@@ -150,40 +162,40 @@ val_annos = []
 # with open("annotations/sr3d_val_stage2_grounding_new.json", "w") as f:
 #     json.dump(val_annos, f, indent=4)
 
-with open("prompts/concise_description_objxx.txt", 'r') as f:
-    prompt_candidates = f.read().splitlines()
+# with open("prompts/concise_description_objxx.txt", 'r') as f:
+#     prompt_candidates = f.read().splitlines()
 
-for anno in annos:
-    scene_id = anno["scan_id"]
-    obj_id = anno["target_id"]
-    caption = anno["utterance"]
-    sentences = sent_tokenize(caption)
-    altered_sentences = [' '.join(sentence.split()) for sentence in sentences]
-    caption = ' '.join([sentence.capitalize() for sentence in altered_sentences])
-    # if caption[-1] == ".":
-    #     caption = caption[:-1]
-    if caption[-1] != ".":
-        caption += "."
-    prompt = random.choice(prompt_candidates).replace("<id>", f"{obj_id:02}")
-    if scene_id in train_scene_ids:
-        train_annos.append({
-            "scene_id": scene_id,
-            "obj_id": obj_id,
-            "prompt": prompt,
-            "caption": caption
-        })
-    else:
-        val_annos.append({
-            "scene_id": scene_id,
-            "obj_id": obj_id,
-            "prompt": prompt,
-            "ref_captions": [caption]
-        })
+# for anno in annos:
+#     scene_id = anno["scan_id"]
+#     obj_id = anno["target_id"]
+#     caption = anno["utterance"]
+#     sentences = sent_tokenize(caption)
+#     altered_sentences = [' '.join(sentence.split()) for sentence in sentences]
+#     caption = ' '.join([sentence.capitalize() for sentence in altered_sentences])
+#     # if caption[-1] == ".":
+#     #     caption = caption[:-1]
+#     if caption[-1] != ".":
+#         caption += "."
+#     prompt = random.choice(prompt_candidates).replace("<id>", f"{obj_id:02}")
+#     if scene_id in train_scene_ids:
+#         train_annos.append({
+#             "scene_id": scene_id,
+#             "obj_id": obj_id,
+#             "prompt": prompt,
+#             "caption": caption
+#         })
+#     else:
+#         val_annos.append({
+#             "scene_id": scene_id,
+#             "obj_id": obj_id,
+#             "prompt": prompt,
+#             "ref_captions": [caption]
+#         })
 
-print(len(train_annos), len(val_annos))
+# print(len(train_annos), len(val_annos))
 
-with open("annotations/sr3d_train_stage2_objxx.json", "w") as f:
-    json.dump(train_annos, f, indent=4)
+# with open("annotations/sr3d_train_stage2_objxx.json", "w") as f:
+#     json.dump(train_annos, f, indent=4)
 
-with open("annotations/sr3d_val_stage2_objxx.json", "w") as f:
-    json.dump(val_annos, f, indent=4)
+# with open("annotations/sr3d_val_stage2_objxx.json", "w") as f:
+#     json.dump(val_annos, f, indent=4)

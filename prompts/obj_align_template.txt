@@ -1,8 +1,2 @@
-It is a {}.
-It is the {}.
-This is a {}.
-This is the {}.
-Obj{} is a {}.
-Obj{} is the {}.
-The obj{} is a {}.
-The obj{} is the {}.
+{} is a {}.
+The {} is a {}.

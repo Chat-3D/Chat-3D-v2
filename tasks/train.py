@@ -49,19 +49,21 @@ max_global_step = 200000000
 
 
 def train(
-        model,
-        model_without_ddp,
-        train_loaders,
-        val_loaders,
-        optimizer,
-        epoch,
-        global_step,
-        device,
-        scheduler,
-        scaler,
-        config,
+    model,
+    model_without_ddp,
+    train_loaders,
+    val_loaders,
+    optimizer,
+    epoch,
+    global_step,
+    device,
+    scheduler,
+    scaler,
+    config,
+    do_eval=True
 ):
     model.train()
+    model.module.llama_model.config.use_cache = False
 
     metric_logger = MetricLogger(delimiter="  ")
     eval_metric_logger = MetricLogger(delimiter="  ")
@@ -78,7 +80,7 @@ def train(
 
     for name in loss_names:
         metric_logger.add_meter(
-            f"stage{stage}-{name}", SmoothedValue(window=100, fmt="{value:.4f}")
+            f"stage{stage}-{name}", SmoothedValue(window=1, fmt="{value:.6f}")
         )
 
     header = f"Train Epoch: [{epoch}]"
@@ -89,7 +91,7 @@ def train(
             d.sampler.set_epoch(epoch)
     train_loader = MetaLoader(name2loader=dict(list(zip(media_types, train_loaders))))
 
-    accum_iter = 4 if stage != 1 else 1
+    accum_iter = 1 if stage != 1 else 1
     eval_freq = 10000  # len(train_loader)
     max_seq_len = 0
 
@@ -97,9 +99,8 @@ def train(
     iterator = metric_logger.log_every(train_loader, log_freq, header)
     for i, (media_type, batch) in enumerate(iterator):
         for k in batch.keys():
-            if k in ["scene_feat", "scene_locs", "scene_colors", "scene_mask", "obj_ids", "detach_mask"]:
+            if k in ["scene_feat", "scene_locs", "scene_colors", "scene_mask", "obj_ids"]:
                 batch[k] = batch[k].to(device)
-
         with torch.cuda.amp.autocast(enabled=stage == 1):
             loss_dict = model(**batch)
             loss = loss_dict["loss"] / accum_iter
@@ -126,13 +127,13 @@ def train(
             metric_logger.update(**{f"stage{stage}-{name}": value})
         metric_logger.update(lr=optimizer.param_groups[-1]["lr"])
 
-        if is_main_process() and config.wandb.enable and (global_step + 1) % log_freq == 0:
+        if is_main_process() and config.wandb.enable and global_step % log_freq == 0:
             logs = metric_logger.get_avg_dict()
             log_dict_to_wandb(logs, step=global_step, prefix="train/")
 
         global_step += 1
 
-        if (i+1) % eval_freq == 0 or i == len(train_loader) - 1:
+        if do_eval and ((i+1) % eval_freq == 0 or i == len(train_loader) - 1):
             val_metrics = evaluate(model, model_without_ddp, val_loaders, epoch, global_step, device, config,
                                    early_stop=i != len(train_loader) - 1)
             if is_main_process():
@@ -143,7 +144,6 @@ def train(
             if is_main_process() and config.wandb.enable:
                 logs = eval_metric_logger.get_avg_dict()
                 log_dict_to_wandb(logs, step=global_step, prefix="val/")
-
         if global_step > max_global_step:
             return global_step
 
@@ -154,16 +154,17 @@ def train(
 
 
 def evaluate(
-        model,
-        model_without_ddp,
-        val_loaders,
-        epoch,
-        global_step,
-        device,
-        config,
-        early_stop=False
+    model,
+    model_without_ddp,
+    val_loaders,
+    epoch,
+    global_step,
+    device,
+    config,
+    early_stop=False
 ):
     model.eval()
+    model.module.llama_model.config.use_cache = True
 
     media_types = get_media_types(val_loaders)
 
@@ -174,7 +175,7 @@ def evaluate(
     val_loader = MetaLoader(name2loader=dict(list(zip(media_types, val_loaders))))
 
     # scores = []
-    sample_freq = len(val_loader) // 5
+    sample_freq = len(val_loader) // 5 + 1
     cosine_scores, l2_distances = [], []
     preds = []
     targets = []
@@ -222,7 +223,7 @@ def evaluate(
                 # if early_stop:
                 #     break
 
-    if len(save_preds) > 2:
+    if len(save_preds) > 0:
         save_preds = sorted(save_preds, key=lambda x: f"{x['scene_id']}_{x['obj_id']:03}_{x['qid']}")
         with open(os.path.join(config.output_dir, f"preds_epoch{epoch}_step{global_step}_rank{get_rank()}.json"),
                   "w") as f:
@@ -335,6 +336,7 @@ def setup_dataloaders(config):
         is_trains=[True] * len(media_types),
         collate_fns=[val_collate_fn] * len(media_types),
     )
+    config.batch_size = train_batch_size
 
     return train_loaders, val_loaders, media_types
 
@@ -350,6 +352,7 @@ def main(config):
     train_loaders, val_loaders, train_media_types = setup_dataloaders(
         config
     )
+
     num_steps_per_epoch = sum(len(d) for d in train_loaders)
     config.scheduler.num_training_steps = num_steps_per_epoch * config.scheduler.epochs
     config.scheduler.num_warmup_steps = num_steps_per_epoch * config.scheduler.warmup_epochs
@@ -373,7 +376,7 @@ def main(config):
     )
     if is_main_process() and config.wandb.enable:
         wandb.watch(model)
-
+    save_step_interval = max(config.scheduler.epochs // 3, 1)
     logger.info("Start training")
     start_time = time.time()
     if not config.evaluate:
@@ -390,6 +393,7 @@ def main(config):
                 scheduler,
                 scaler,
                 config,
+                # do_eval=((epoch+1) % save_step_interval == 0)
             )
 
             # if global_step > max_global_step and epoch > 0:
@@ -407,14 +411,14 @@ def main(config):
                         del state_dict[k]
                 save_obj = {
                     "model": state_dict,
-                    "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(),
-                    "scaler": scaler.state_dict(),
+                    # "optimizer": optimizer.state_dict(),
+                    # "scheduler": scheduler.state_dict(),
+                    # "scaler": scaler.state_dict(),
                     "config": config,
                     "epoch": epoch,
                     "global_step": global_step,
                 }
-                if config.get("do_save", True):
+                if ((epoch+1) % save_step_interval == 0 or epoch == config.scheduler.epochs - 1) and config.do_save and not config.debug:
                     if config.get("save_latest", False):
                         torch.save(save_obj, join(config.output_dir, "ckpt_latest.pth"))
                     else:

@@ -1,10 +1,10 @@
-Begin by detailing the visual aspects of the obj<id> before delving into its spatial context among other elements within the scene.
-First, depict the physical characteristics of the obj<id>, followed by its placement and interactions within the surrounding environment.
-Describe the appearance of the obj<id>, then elaborate on its positioning relative to other objects in the scene.
-Paint a picture of the visual attributes of obj<id>, then explore how it relates spatially to other elements in the scene.
-Start by articulating the outward features of the obj<id>, then transition into its spatial alignment within the broader scene.
-Provide a detailed description of the appearance of obj<id> before analyzing its spatial connections with other elements in the scene.
-Capture the essence of the appearance of obj<id>, then analyze its spatial relationships within the scene's context.
-Detail the physical characteristics of the obj<id> and subsequently examine its spatial dynamics amidst other objects in the scene.
-Describe the visual traits of obj<id> first, then elucidate its spatial arrangements in relation to neighboring elements.
-Begin by outlining the appearance of obj<id>, then proceed to illustrate its spatial orientation within the scene alongside other objects.
+Begin by detailing the visual aspects of the <id> before delving into its spatial context among other elements within the scene.
+First, depict the physical characteristics of the <id>, followed by its placement and interactions within the surrounding environment.
+Describe the appearance of the <id>, then elaborate on its positioning relative to other objects in the scene.
+Paint a picture of the visual attributes of <id>, then explore how it relates spatially to other elements in the scene.
+Start by articulating the outward features of the <id>, then transition into its spatial alignment within the broader scene.
+Provide a detailed description of the appearance of <id> before analyzing its spatial connections with other elements in the scene.
+Capture the essence of the appearance of <id>, then analyze its spatial relationships within the scene's context.
+Detail the physical characteristics of the <id> and subsequently examine its spatial dynamics amidst other objects in the scene.
+Describe the visual traits of <id> first, then elucidate its spatial arrangements in relation to neighboring elements.
+Begin by outlining the appearance of <id>, then proceed to illustrate its spatial orientation within the scene alongside other objects.

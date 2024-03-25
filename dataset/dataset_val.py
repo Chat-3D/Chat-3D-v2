@@ -16,22 +16,19 @@ class ValPTDataset(PTBaseDataset):
     def __init__(self, ann_file, system_path="", stage=2, **kwargs):
         super().__init__()
         self.feat_file, self.attribute_file, self.prompt_file = ann_file[:3]
-        with open(system_path, "r") as f:
-            self.system = "\n".join([x.strip() for x in f.readlines()])
+        # with open(system_path, "r") as f:
+        #     self.system = "\n".join([x.strip() for x in f.readlines()])
         self.feats = torch.load(self.feat_file, map_location='cpu')
         self.attributes = torch.load(self.attribute_file, map_location='cpu')
         self.anno = json.load(open(self.prompt_file, 'r'))
-        if stage == 2:
-            self.prompt_template = "\n### Human: {}\n### Assistant:"
-        else:
-            self.prompt_template = "\n### Human: {}\n###"
 
     def __len__(self):
         return len(self.anno)
 
     def __getitem__(self, index):
         scene_id, obj_id, scene_feat, scene_locs, scene_colors = self.get_anno(index)
-        prompt = self.system + self.prompt_template.format(self.anno[index]["prompt"])
+        # prompt = self.system + self.prompt_template.format(self.anno[index]["prompt"])
+        prompt = self.anno[index]["prompt"]
         ref_captions = self.anno[index]["ref_captions"].copy() if "ref_captions" in self.anno[index] else []
         qid = self.anno[index]["qid"] if "qid" in self.anno[index] else 0
         obj_num = scene_locs.shape[0]
